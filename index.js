@@ -39,4 +39,13 @@ app.get('/users/:fullname/fullname', auth, (req, res) => {
   })
 })
 
+app.get('/users/:account/account', auth, (req, res) => {
+  users.findByPk(req.params.account).then((user) => {
+    if (!user) {
+      res.status(404).send('user not found')
+    }
+    return res.send({ user })
+  })
+})
+
 app.listen(5000, () => { return console.log('Server up on port 5000') })
