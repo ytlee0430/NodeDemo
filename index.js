@@ -24,4 +24,13 @@ app.get('/users', auth, (req, res) => {
   })
 })
 
+app.get('/users/:fullname/fullname', auth, (req, res) => {
+  users.findAll({ where: { fullname: req.params.fullname } }).then((allUsers) => {
+    const allUsersData = allUsers.map((u) => {
+      return u.dataValues
+    })
+    return res.send({ users_data: allUsersData })
+  })
+})
+
 app.listen(5000, () => { return console.log('Server up on port 5000') })
