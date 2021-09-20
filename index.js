@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const Express = require('express')
 
 const app = Express()
@@ -21,13 +22,30 @@ const users = UsersModel(sequelize, Sequelize.DataTypes)
 
 app.set('secret', config.secret)
 app.use(Express.json())
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
   res.status(500).send('Internal Error')
 })
 
+function setGetUsersQueryDefault(query) {
+  if (!parseInt(query.limit, 10)) {
+    query.limit = 1000
+  }
+  if (!parseInt(query.offset, 10)) {
+    query.offset = 0
+  }
+  query.order_colum = query.order_colum || 'acct'
+  query.order = query.order || 'ASC'
+}
+
 app.get('/users', auth, (req, res) => {
-  users.findAll().then((allUsers) => {
-    if (allUsers.length == 0) {
+  setGetUsersQueryDefault(req.query)
+  users.findAll({
+    limit: req.query.limit,
+    offset: req.query.offset,
+    order: [[req.query.order_colum, req.query.order]]
+  }).then((allUsers) => {
+    if (allUsers.length === 0) {
       res.status(404).send({ message: 'users resource not found' })
     }
 
@@ -82,6 +100,7 @@ app.post('/users', body('account').isLength({ max: 32 }),
     }).catch((error) => {
       return res.status(400).send({ message: error.toString() })
     })
+    return res
   })
 
 app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }), (req, res) => {
@@ -98,6 +117,7 @@ app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd
   }).catch((error) => {
     return res.status(400).send({ message: error.toString() })
   })
+  return res
 })
 
 app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }), authAccount, (req, res) => {
@@ -109,7 +129,7 @@ app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength
     if (user == null) {
       return res.status(404).send({ message: 'account not found' })
     }
-    if (user.pwd != req.body.pwd) {
+    if (user.pwd !== req.body.pwd) {
       return res.status(401).send({ message: 'authenticate fail' })
     }
     users.destroy({ where: { acct: user.acct } })
@@ -117,6 +137,7 @@ app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength
   }).catch((error) => {
     return res.status(400).send({ message: error.toString() })
   })
+  return res
 })
 
 app.put('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }),
@@ -141,6 +162,7 @@ app.put('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ 
     }).catch((error) => {
       return res.status(400).send({ message: error.toString() })
     })
+    return res
   })
 
 app.listen(5000, () => { return console.log('Server up on port 5000') })
