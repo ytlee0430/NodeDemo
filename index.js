@@ -140,6 +140,16 @@ app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength
   return res
 })
 
+function updateUserData(user, requestBody, updatePassword = false) {
+  if (requestBody.fullname != null) {
+    user.fullname = requestBody.fullname
+  }
+  if (updatePassword && requestBody.new_password != null) {
+    user.pwd = requestBody.new_password
+  }
+  user.updated_at = new Date().toUTCString()
+}
+
 app.put('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }),
   body('fullname').isLength({ max: 32 }), authAccount, (req, res) => {
     const errors = validationResult(req)
@@ -150,13 +160,26 @@ app.put('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ 
       if (user == null) {
         return res.status(401).send({ message: 'authenticate fail' })
       }
-      if (req.body.fullname != null) {
-        user.fullname = req.body.fullname
+      updateUserData(user, req.body, true)
+      user.save()
+      return res.status(200).send({ user })
+    }).catch((error) => {
+      return res.status(400).send({ message: error.toString() })
+    })
+    return res
+  })
+
+app.put('/users/fullname', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }),
+  body('fullname').isLength({ max: 32 }), authAccount, (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ message: errors.array() })
+    }
+    users.findOne({ where: { acct: req.body.account, pwd: req.body.pwd } }).then((user) => {
+      if (user == null) {
+        return res.status(401).send({ message: 'authenticate fail' })
       }
-      if (req.body.new_password != null) {
-        user.pwd = req.body.new_password
-      }
-      user.updated_at = new Date().toUTCString()
+      updateUserData(user, req.body)
       user.save()
       return res.status(200).send({ user })
     }).catch((error) => {
