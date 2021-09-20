@@ -20,6 +20,9 @@ const users = UsersModel(sequelize, Sequelize.DataTypes)
 
 app.set('secret', config.secret)
 app.use(Express.json())
+app.use((err, req, res, _next) => {
+  res.status(500).send('Internal Error')
+})
 
 app.get('/users', auth, (req, res) => {
   users.findAll().then((allUsers) => {
@@ -32,6 +35,8 @@ app.get('/users', auth, (req, res) => {
     })
 
     return res.send({ users: allUsersData })
+  }).catch((error) => {
+    return res.status(400).send({ message: error.toString() })
   })
 })
 
@@ -42,6 +47,8 @@ app.get('/users/:fullname/fullname', auth, (req, res) => {
       res.status(404).send({ message: 'fullname not found' })
     }
     return res.send({ user: user.acct })
+  }).catch((error) => {
+    return res.status(400).send({ message: error.toString() })
   })
 })
 
@@ -51,11 +58,17 @@ app.get('/users/:account/account', authAccount, (req, res) => {
       res.status(404).send({ message: 'user not found' })
     }
     return res.send({ user })
+  }).catch((error) => {
+    return res.status(400).send({ message: error.toString() })
   })
 })
 
 app.post('/users', body('account').isLength({ max: 32 }),
   body('pwd').isLength({ max: 32 }), body('fullname').isLength({ max: 32 }), (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     users.create({
       acct: req.body.account,
       pwd: req.body.pwd,
@@ -63,19 +76,28 @@ app.post('/users', body('account').isLength({ max: 32 }),
       created_at: new Date().toUTCString(),
       updated_at: new Date().toUTCString()
     }).then((user) => {
-      const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '600m' })
+      const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '60m' })
       return res.status(201).send({ user, token })
+    }).catch((error) => {
+      return res.status(400).send({ message: error.toString() })
     })
   })
 
 app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }), (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
+  }
   users.findOne({ where: { acct: req.body.account, pwd: req.body.pwd } }).then((user) => {
     if (user == null) {
       return res.status(401).send({ message: 'authenticate fail' })
     }
-
     const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '600m' })
     return res.status(201).send({ user, token })
+  }).catch((error) => {
+    return res.status(400).send({ message: error.toString() })
+  })
+})
 
 app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }), authAccount, (req, res) => {
   const errors = validationResult(req)
