@@ -3,7 +3,7 @@ const config = require('../config/config')
 
 const verifyToken = (req, res, next) => {
   const token = req.headers['x-access-token']
-  const account = req.body.acct || req.params.account
+  const account = req.body.account || req.params.account
   if (!token) {
     return res.status(403).send('JWT token is required')
   }
