@@ -1,0 +1,438 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "Swagger for Demo API",
+      "version": "1.0.0",
+      "title": "Node Js Demo",
+      "termsOfService": "http://localhost:5000/",
+      "contact": {
+        "email": "ytlee0430@gmail.com"
+      }
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "Users",
+        "description": "Operations about user"
+      }
+    ],
+    "schemes": [
+      "http",
+      "https"
+    ],
+    "paths": {
+      "/users": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get all users",
+          "description": "Get all users with paging/sorting",
+          "operationId": "getUsers",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "header",
+              "type": "string",
+              "name": "x-access-token",
+              "description": "must be a valid token",
+              "required": true
+            },
+            {
+              "in": "query",
+              "type": "integer",
+              "name": "limit",
+              "description": "Get how many rows per query, default 1000",
+              "required": false
+            },
+            {
+              "in": "query",
+              "type": "integer",
+              "name": "offset",
+              "description": "skip how many rows, default 0",
+              "required": false
+            },
+            {
+              "in": "query",
+              "type": "string",
+              "name": "order_colunm",
+              "description": "order by which column, default attc",
+              "required": false
+            },
+            {
+              "in": "query",
+              "type": "string",
+              "name": "order",
+              "description": "order, default ASC",
+              "required": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/AllUsers"
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Create user",
+          "description": "Create a user and return token",
+          "operationId": "createUser",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Created user object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateUserRequest"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/CreateUserResponse"
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Delete user",
+          "description": "Delte a user",
+          "operationId": "deleteUser",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "header",
+              "type": "string",
+              "name": "x-access-token",
+              "description": "must be a valid token with {account}",
+              "required": true
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Created user object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AuthUserRequest"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "successful operation"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Update user",
+          "description": "Update a user",
+          "operationId": "updateUser",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "header",
+              "type": "string",
+              "name": "x-access-token",
+              "description": "must be a valid token with {account}",
+              "required": true
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Update user object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateUserRequest"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/UpdatedUserResponse"
+              }
+            }
+          }
+        }
+      },
+      "/users/authenticate": {
+        "post": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Auth user",
+          "description": "Auth users password and return token",
+          "operationId": "authUserPassword",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Auth password object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/AuthUserRequest"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/CreateUserResponse"
+              }
+            }
+          }
+        }
+      },
+      "/users/{fullname}/fullname": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get user account by full name",
+          "description": "Find an user account by fullname",
+          "operationId": "GetUserByFullname",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "header",
+              "type": "string",
+              "name": "x-access-token",
+              "description": "must be a valid token",
+              "required": true
+            },
+            {
+              "in": "path",
+              "name": "fullname",
+              "type": "string",
+              "description": "User's full name",
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/UserAccount"
+              }
+            }
+          }
+        }
+      },
+      "/users/{account}/account": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get user detail by account",
+          "description": "Find an user by fullname",
+          "operationId": "GetUserDetail",
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "header",
+              "type": "string",
+              "name": "x-access-token",
+              "description": "must be a valid token with {account}",
+              "required": true
+            },
+            {
+              "in": "path",
+              "name": "account",
+              "type": "string",
+              "description": "User account",
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securityDefinitions": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+        "flow": "implicit",
+        "scopes": {
+          "write:pets": "modify pets in your account",
+          "read:pets": "read your pets"
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
+    "definitions": {
+      "AllUsers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "UserAccount": {
+        "type": "object",
+        "properties": {
+          "acct": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "acct": {
+            "type": "string"
+          },
+          "pwd": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "AuthUserRequest": {
+        "type": "object",
+        "properties": {
+          "acct": {
+            "type": "string"
+          },
+          "pwd": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "acct": {
+            "type": "string"
+          },
+          "pwd": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "CreateUserResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "UpdatedUserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Tag"
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "externalDocs": {
+      "description": "Find out more about Swagger",
+      "url": "http://swagger.io"
+    }
+  }

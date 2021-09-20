@@ -6,6 +6,8 @@ const app = Express()
 const Sequelize = require('sequelize')
 const { body, validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./swagger/swagger.json')
 const UsersModel = require('./models/users')
 const config = require('./config/config')
 const auth = require('./middleware/auth')
@@ -26,6 +28,7 @@ app.use(Express.json())
 app.use((err, req, res, _next) => {
   res.status(500).send('Internal Error')
 })
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 function setGetUsersQueryDefault(query) {
   if (!parseInt(query.limit, 10)) {
@@ -34,7 +37,7 @@ function setGetUsersQueryDefault(query) {
   if (!parseInt(query.offset, 10)) {
     query.offset = 0
   }
-  query.order_colum = query.order_colum || 'acct'
+  query.order_colunm = query.order_colunm || 'acct'
   query.order = query.order || 'ASC'
 }
 
@@ -43,7 +46,7 @@ app.get('/users', auth, (req, res) => {
   users.findAll({
     limit: req.query.limit,
     offset: req.query.offset,
-    order: [[req.query.order_colum, req.query.order]]
+    order: [[req.query.order_colunm, req.query.order]]
   }).then((allUsers) => {
     if (allUsers.length === 0) {
       res.status(404).send({ message: 'users resource not found' })
