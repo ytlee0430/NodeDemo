@@ -76,6 +76,23 @@ app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd
 
     const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '600m' })
     return res.status(201).send({ user, token })
+
+app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }), authAccount, (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
+  }
+  users.findOne({ where: { acct: req.body.account } }).then((user) => {
+    if (user == null) {
+      return res.status(404).send({ message: 'account not found' })
+    }
+    if (user.pwd != req.body.pwd) {
+      return res.status(401).send({ message: 'authenticate fail' })
+    }
+    users.destroy({ where: { acct: user.acct } })
+    return res.status(204).send()
+  }).catch((error) => {
+    return res.status(400).send({ message: error.toString() })
   })
 })
 
