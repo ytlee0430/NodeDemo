@@ -13,7 +13,8 @@ const authAccount = require('./middleware/authAccount')
 const sequelize = new Sequelize(config.db.db_name, config.db.user_name, config.db.pwd, {
   host: config.db.host,
   dialect: config.db.dialect,
-  port: config.db.port
+  port: config.db.port,
+  timezone: config.db.timezone
 })
 
 const users = UsersModel(sequelize, Sequelize.DataTypes)
@@ -92,7 +93,7 @@ app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd
     if (user == null) {
       return res.status(401).send({ message: 'authenticate fail' })
     }
-    const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '600m' })
+    const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '60m' })
     return res.status(201).send({ user, token })
   }).catch((error) => {
     return res.status(400).send({ message: error.toString() })
@@ -117,5 +118,29 @@ app.delete('/users', body('account').isLength({ max: 32 }), body('pwd').isLength
     return res.status(400).send({ message: error.toString() })
   })
 })
+
+app.put('/users', body('account').isLength({ max: 32 }), body('pwd').isLength({ max: 32 }),
+  body('fullname').isLength({ max: 32 }), authAccount, (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).send({ message: errors.array() })
+    }
+    users.findOne({ where: { acct: req.body.account, pwd: req.body.pwd } }).then((user) => {
+      if (user == null) {
+        return res.status(401).send({ message: 'authenticate fail' })
+      }
+      if (req.body.fullname != null) {
+        user.fullname = req.body.fullname
+      }
+      if (req.body.new_password != null) {
+        user.pwd = req.body.new_password
+      }
+      user.updated_at = new Date().toUTCString()
+      user.save()
+      return res.status(200).send({ user })
+    }).catch((error) => {
+      return res.status(400).send({ message: error.toString() })
+    })
+  })
 
 app.listen(5000, () => { return console.log('Server up on port 5000') })

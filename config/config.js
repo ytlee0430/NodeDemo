@@ -6,6 +6,7 @@ module.exports = {
     pwd: '1qaz!QAZ',
     host: 'localhost',
     dialect: 'postgres',
-    port: '5433'
+    port: '5433',
+    timezone: '+08:00'
   }
 }
