@@ -2,16 +2,20 @@
 const Express = require('express')
 
 const app = Express()
-
 const Sequelize = require('sequelize')
+const url = require('url')
 const { body, validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
 const swaggerUi = require('swagger-ui-express')
+const SocketServer = require('ws').Server
+
 const swaggerDocument = require('./swagger/swagger.json')
 const UsersModel = require('./models/users')
 const config = require('./config/config')
 const auth = require('./middleware/auth')
 const authAccount = require('./middleware/authAccount')
+
+const webSockets = {}
 
 const sequelize = new Sequelize(config.db.db_name, config.db.user_name, config.db.pwd, {
   host: config.db.host,
@@ -29,6 +33,20 @@ app.use((err, req, res, _next) => {
   res.status(500).send('Internal Error')
 })
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+app.listen(5000, () => { return console.log('Server up on port 5000') })
+const server = Express().listen(3000, () => { return console.log('WebSocket Listening on 3000') })
+const wss = new SocketServer({ server })
+
+wss.on('connection', (webSocket, req) => {
+  const parameters = url.parse(req.url, true)
+  const userID = parameters.query.acct
+  webSockets[userID] = webSocket
+  console.log(`connected: ${userID} in ${Object.getOwnPropertyNames(webSocket)}`)
+  webSocket.on('close', () => {
+    console.log('Close connected')
+  })
+})
 
 function setGetUsersQueryDefault(query) {
   if (!parseInt(query.limit, 10)) {
@@ -49,7 +67,7 @@ app.get('/users', auth, (req, res) => {
     order: [[req.query.order_colunm, req.query.order]]
   }).then((allUsers) => {
     if (allUsers.length === 0) {
-      res.status(404).send({ message: 'users resource not found' })
+      return res.status(404).send({ message: 'users resource not found' })
     }
 
     const allUsersData = allUsers.map((u) => {
@@ -113,6 +131,9 @@ app.post('/users/authenticate', body('account').isLength({ max: 32 }), body('pwd
   }
   users.findOne({ where: { acct: req.body.account, pwd: req.body.pwd } }).then((user) => {
     if (user == null) {
+      if (req.body.account in webSockets) {
+        webSockets[req.body.account].send('authenticate fail')
+      }
       return res.status(401).send({ message: 'authenticate fail' })
     }
     const token = jwt.sign(user.toJSON(), app.get('secret'), { expiresIn: '60m' })
@@ -190,5 +211,3 @@ app.put('/users/fullname', body('account').isLength({ max: 32 }), body('pwd').is
     })
     return res
   })
-
-app.listen(5000, () => { return console.log('Server up on port 5000') })

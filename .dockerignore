@@ -1,6 +1,7 @@
 CachedData/
 node_modules/
 keys/
+web-socket-client/
 Dockerfile
 storage.json
 docker-compose.yml
