@@ -8,12 +8,20 @@ const { body, validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
 const swaggerUi = require('swagger-ui-express')
 const SocketServer = require('ws').Server
-
+const https = require('https')
+const fs = require('fs')
 const swaggerDocument = require('./swagger/swagger.json')
 const UsersModel = require('./models/users')
 const config = require('./config/config')
 const auth = require('./middleware/auth')
 const authAccount = require('./middleware/authAccount')
+
+const hskey = fs.readFileSync('keys/server.key', 'utf8')
+const hscert = fs.readFileSync('keys/server.crt', 'utf8')
+const credentials = {
+  key: hskey,
+  cert: hscert
+}
 
 const webSockets = {}
 
@@ -35,6 +43,9 @@ app.use((err, req, res, _next) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.listen(5000, () => { return console.log('Server up on port 5000') })
+https.createServer(credentials, app).listen(5001, () => {
+  console.log('Https Server up on port 5001')
+})
 const server = Express().listen(3000, () => { return console.log('WebSocket Listening on 3000') })
 const wss = new SocketServer({ server })
 
