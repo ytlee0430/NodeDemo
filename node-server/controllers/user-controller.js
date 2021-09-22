@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 
 const config = require('../config/config')
 const UsersModel = require('../models/users')
-const sendMessageSocket = require('../web-socket/send-message-socket')
+const sendMessageSocket = require('../services/web-socket/send-message-socket')
 
 const sequelize = new Sequelize(config.db.db_name, config.db.user_name, config.db.pwd, {
   host: config.db.host,
