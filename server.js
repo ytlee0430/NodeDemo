@@ -13,6 +13,7 @@ const fs = require('fs')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const csrf = require('csurf')
+const helmet = require('helmet')
 const swaggerDocument = require('./swagger/swagger.json')
 const UsersModel = require('./models/users')
 const config = require('./config/config')
@@ -53,6 +54,7 @@ app.use(
   })
 )
 app.use(csrf())
+app.use(helmet())
 
 app.listen(5000, () => { return console.log('Server up on port 5000') })
 https.createServer(credentials, app).listen(5001, () => {
