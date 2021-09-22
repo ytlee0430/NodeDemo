@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize')
-const _users = require('./users')
+const Users = require('./users')
 
 function initModels(sequelize) {
-  const users = _users(sequelize, DataTypes)
+  const users = Users(sequelize, DataTypes)
 
   return {
     users

@@ -1,0 +1,45 @@
+{
+  "name": "NodeDemo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node.js",
+  "scripts": {
+    "debug": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run_psql": "docker run -it --rm -h 0.0.0.0 -p 5433:5432 -e POSTGRES_USER=ui_test -e POSTGRES_PASSWORD='1qaz!QAZ' -e POSTGRES_DB=ui_test  -v ~/var/lib/postgresql/data  postgres",
+    "create_users": "PGPASSWORD='1qaz!QAZ' psql --host 0.0.0.0 --port 5433 --user ui_test --dbname ui_test  -c 'CREATE TABLE users (acct VARCHAR(32) PRIMARY KEY, pwd VARCHAR(32) NOT NULL, fullname VARCHAR(32) NOT NULL, created_at TIMESTAMP NOT NUll, updated_at TIMESTAMP)'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ytlee0430/NodeDemo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ytlee0430/NodeDemo/issues"
+  },
+  "homepage": "https://github.com/ytlee0430/NodeDemo#readme",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "csurf": "^1.11.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.12.1",
+    "helmet": "^4.6.0",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.6.5",
+    "swagger-ui-express": "^4.1.6",
+    "url": "^0.11.0",
+    "ws": "^8.2.2"
+  }
+}

@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "nodemon",
-            "program": "${workspaceFolder}/server.js",
+            "program": "${workspaceFolder}/node-server/server.js",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
           }
