@@ -1,0 +1,8 @@
+CachedData/
+node_modules/
+keys/
+Dockerfile
+storage.json
+docker-compose.yml
+.eslintrc
+pgdata
