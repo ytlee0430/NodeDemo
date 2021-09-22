@@ -4,9 +4,9 @@ module.exports = {
     user_name: 'ui_test',
     db_name: 'ui_test',
     pwd: '1qaz!QAZ',
-    host: 'localhost',
+    host: 'db',
     dialect: 'postgres',
-    port: '5433',
+    port: '5432',
     timezone: '+08:00'
   }
 }
