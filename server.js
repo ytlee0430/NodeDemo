@@ -10,6 +10,9 @@ const swaggerUi = require('swagger-ui-express')
 const SocketServer = require('ws').Server
 const https = require('https')
 const fs = require('fs')
+const cookieParser = require('cookie-parser')
+const session = require('express-session')
+const csrf = require('csurf')
 const swaggerDocument = require('./swagger/swagger.json')
 const UsersModel = require('./models/users')
 const config = require('./config/config')
@@ -41,6 +44,15 @@ app.use((err, req, res, _next) => {
   res.status(500).send('Internal Error')
 })
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use(cookieParser())
+app.use(
+  session({
+    secret: '123qwe',
+    resave: false,
+    saveUninitialized: false
+  })
+)
+app.use(csrf())
 
 app.listen(5000, () => { return console.log('Server up on port 5000') })
 https.createServer(credentials, app).listen(5001, () => {
@@ -69,6 +81,10 @@ function setGetUsersQueryDefault(query) {
   query.order_colunm = query.order_colunm || 'acct'
   query.order = query.order || 'ASC'
 }
+
+app.get('/xsrf-token', (req, res) => {
+  res.send({ csrfToken: req.csrfToken() })
+})
 
 app.get('/users', auth, (req, res) => {
   setGetUsersQueryDefault(req.query)
