@@ -1,7 +1,7 @@
 const WebSocket = require('ws')
 const readline = require('readline')
 const request = require('request')
-const strict = require('assert/strict')
+const config = require('./config')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -9,25 +9,38 @@ const rl = readline.createInterface({
 })
 
 function signIn(account, pwd) {
-  const options = {
-    method: 'POST',
-    url: 'http://localhost:5000/users/authenticate',
+  const tokenOptions = {
+    method: 'GET',
+    url: `http://${config.host}:5000/xsrf-token`,
     headers: {
       'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      account,
-      pwd
-    })
+    }
   }
-  request(options, (error, response) => {
-    console.log(response.body)
-    console.log('\n')
+  request(tokenOptions, (tokenError, tokenResponse) => {
+    const cookie = tokenResponse.headers['set-cookie']
+    const { csrfToken } = JSON.parse(tokenResponse.body)
+    const options = {
+      method: 'POST',
+      url: `http://${config.host}:5000/users/authenticate`,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': csrfToken,
+        cookie
+      },
+      body: JSON.stringify({
+        account,
+        pwd
+      }),
+      credentials: 'include'
+    }
+    request(options, (error, response) => {
+      // console.log(response.body)
+      console.log('response back \n')
+    })
   })
 }
 
 async function recursive() {
-  console.log('here! \n')
   let accountName = ''
   rl.question('What is your account, password? \n', (str) => {
     if (str === 'exit') {
